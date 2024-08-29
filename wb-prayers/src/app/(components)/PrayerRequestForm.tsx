@@ -1,14 +1,15 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as RPNInput from "react-phone-number-input"
 import { toast } from "sonner"
-import z from "zod"
 
 import { Exception } from "@/types/database"
 import { countries } from "@/config/countries"
-import { createPrayerRequest } from "@/lib/action"
+import { createPrayerRequest } from "@/lib/PrayersController"
+import { PrayerRequestSchema, type PrayerRequestFormSchema } from "@/lib/utils"
 
 import { Button } from "../../components/ui/button"
 import {
@@ -21,21 +22,8 @@ import {
 import { CountrySelect } from "../../components/ui/phone-input"
 import { Textarea } from "../../components/ui/textarea"
 
-const countryCodes = countries.map((country) => country.value.toString()) as [
-  string,
-  ...string[],
-]
-
-export const PrayerRequestSchema = z.object({
-  prayerRequest: z
-    .string()
-    .min(10, "Please be as specific as possible.")
-    .max(250, "Prayer request is like a Tweet, no more than 250 characters."),
-  country: z.enum(countryCodes, { required_error: "Country is required" }),
-})
-export type PrayerRequestFormSchema = z.infer<typeof PrayerRequestSchema>
-
 export default function PrayerRequestForm() {
+  const router = useRouter()
   const form = useForm<PrayerRequestFormSchema>({
     resolver: zodResolver(PrayerRequestSchema),
     defaultValues: {
@@ -47,7 +35,9 @@ export default function PrayerRequestForm() {
   async function onSubmit(values: PrayerRequestFormSchema) {
     toast.promise(createPrayerRequest(values), {
       loading: "Creating prayer request...",
-      success: "Prayer request created successfully",
+      success: (data) => {
+        return "Prayer request created successfully"
+      },
       error: (error) => {
         console.log(error)
         if (error instanceof Exception) {
@@ -56,6 +46,7 @@ export default function PrayerRequestForm() {
         return "Failed to create prayer request"
       },
     })
+    router.push("/")
   }
 
   return (
