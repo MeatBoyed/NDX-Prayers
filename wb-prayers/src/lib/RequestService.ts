@@ -1,3 +1,4 @@
+import { CommentServiceResponse } from "@/server/CommentService"
 import { PrayerServiceResponse } from "@/server/PrayerService"
 
 import { env } from "@/env.mjs"
@@ -55,4 +56,27 @@ export async function createPrayerRequest(
   }
 
   return (await res.json()) as PrayerServiceResponse
+}
+
+export async function createCommentRequest(
+  prayerRequest: PrayerRequestFormSchema,
+  prayerRequestId: string
+) {
+  const res = await fetch(
+    `${env.NEXT_PUBLIC_APP_URL}/api/prayers/${prayerRequestId}/comments`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(prayerRequest),
+    }
+  )
+
+  if (!res.ok) {
+    console.log("Prayer Request Form Post Error: ", res)
+    throw new Error("Failed to create prayer request")
+  }
+
+  return (await res.json()) as CommentServiceResponse
 }

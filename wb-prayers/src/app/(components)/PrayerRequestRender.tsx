@@ -1,19 +1,19 @@
 import Link from "next/link"
 import { HomeIcon } from "lucide-react"
 
-import { getPrayerRequests } from "@/lib/PrayersController"
+import { getPrayerRequests } from "@/lib/RequestService"
 import { Button } from "@/components/ui/button"
 import Typography from "@/components/ui/Typography"
 
-import PrayerCard from "./PrayerCard"
+import { PrayerCard } from "./PrayerCard"
 
 export default async function PrayerRequestRender() {
   const prayerRequests = await getPrayerRequests()
-  // console.log("Prayer Requests", prayerRequests?.total)
+  console.log("Prayer Requests", prayerRequests?.prayerRequests)
 
   if (!prayerRequests) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="flex min-h-fit flex-col items-center justify-center p-4">
         <Typography variant="h1" className="mb-2 text-4xl font-bold">
           Oh my goodness!
         </Typography>
@@ -32,7 +32,7 @@ export default async function PrayerRequestRender() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex min-w-full flex-col gap-3">
       <Typography variant={"p"} affects={"muted"} removeMargin>
         Requests: {prayerRequests.total}
       </Typography>
@@ -40,9 +40,9 @@ export default async function PrayerRequestRender() {
         id="prayer-requests"
         className="grid w-full grid-cols-1 gap-4 md:grid-cols-2"
       >
-        {prayerRequests.prayerRequests.map((prayerRequest) => (
-          <PrayerCard key={prayerRequest.$id} prayerRequest={prayerRequest} />
-        ))}
+        {/* {prayerRequests.prayerRequests.map((prayerRequest) => (
+          <PrayerCard key={prayerRequest.id} prayerRequest={prayerRequest} />
+        ))} */}
       </section>
     </div>
   )

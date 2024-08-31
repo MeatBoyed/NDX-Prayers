@@ -1,11 +1,28 @@
 import Link from "next/link"
 import { HomeIcon } from "lucide-react"
 
-import { getPrayerPageData } from "@/lib/PrayersController"
+import { getPrayerPageData, getPrayerRequests } from "@/lib/RequestService"
 import { Button } from "@/components/ui/button"
 import Typography from "@/components/ui/Typography"
+import AnimatedBorderTrail from "@/components/animata/container/animated-border-trail"
 
-import PrayerCard from "../(components)/PrayerCard"
+import { PrayerCard } from "../(components)/PrayerCard"
+
+export const dynamicParams = true
+
+export async function generateStaticParams() {
+  const prayerRequests = await getPrayerRequests()
+
+  if (!prayerRequests) {
+    return []
+  }
+
+  return prayerRequests.prayerRequests.map((prayer) => ({
+    prayerId: prayer.id,
+  }))
+}
+
+export const revalidate = 43200 // Revalidate every 12 hours
 
 export default async function PrayerRequestPage({
   params: { prayerId },
@@ -39,7 +56,27 @@ export default async function PrayerRequestPage({
   return (
     <main className="flex min-h-screen w-full items-center justify-center gap-20 px-5 pb-16 pt-4">
       <div className="flex w-full flex-col items-center justify-center gap-14 md:max-w-lg lg:max-w-4xl">
+        {/* <AnimatedBorderTrail
+          color="purple"
+          trailSize="md"
+          duration="10s"
+          className="min-w-fit md:max-w-md"
+        > */}
+
         <PrayerCard prayerRequest={prayerRequest.prayerRequests[0]} />
+        {/* </AnimatedBorderTrail> */}
+
+        {/* <Collapsible className="w-full">
+          <CollapsibleTrigger>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="grid w-full grid-cols-1 gap-4">
+              <PrayerCard prayerRequest={prayerRequest.prayerRequests[0]}>
+                <CommentFooter />
+              </PrayerCard>
+            </div>
+          </CollapsibleContent>
+        </Collapsible> */}
       </div>
     </main>
   )

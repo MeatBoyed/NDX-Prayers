@@ -1,13 +1,15 @@
-import { database } from "@/appwrite"
-import { PrayerRequest } from "@/types"
-import { AppwriteException, ID, Query } from "appwrite"
+import db from "@/db"
+import { PrayerRequestAndComments } from "@/types"
+import { PrayerRequest, Prisma, Visibility } from "@prisma/client"
 import { Err, Ok, Result } from "ts-results"
 
-import { env } from "@/env"
 import { type PrayerRequestFormSchema } from "@/lib/utils"
 
+import { handlePrismaError } from "./lib/PrismaExceptions"
+
+// Update the PrayerServiceResponse interface
 export interface PrayerServiceResponse {
-  prayerRequests: PrayerRequest[]
+  prayerRequests: PrayerRequestAndComments[]
   total: number
 }
 
@@ -16,36 +18,41 @@ export interface PrayerServiceError {
   message: string
 }
 
-export async function getPrayerRequests(): Promise<
+export async function GetAll(): Promise<
   Result<PrayerServiceResponse, PrayerServiceError>
 > {
   try {
-    const createdDoc = await database.listDocuments(
-      env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID,
-      [Query.orderDesc("createdAt")]
-    )
-    console.log("Prayer Service: ", createdDoc.total)
+    const prayerRequests = await db.prayerRequest.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        comments: true,
+      },
+    })
     return Ok({
-      prayerRequests: createdDoc.documents as PrayerRequest[],
-      total: createdDoc.total,
+      prayerRequests,
+      total: prayerRequests.length,
     })
   } catch (error) {
     return Err(handlePrayerServiceError(error))
   }
 }
 
-export async function getPrayerRequest(
+export async function Get(
   prayerId: string
 ): Promise<Result<PrayerServiceResponse, PrayerServiceError>> {
   try {
-    const createdDoc = await database.getDocument(
-      env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID,
-      prayerId
-    )
+    const prayerRequest = await db.prayerRequest.findUniqueOrThrow({
+      where: {
+        id: prayerId,
+      },
+      include: {
+        comments: true,
+      },
+    })
     return Ok({
-      prayerRequests: [createdDoc as PrayerRequest],
+      prayerRequests: [prayerRequest],
       total: 1,
     })
   } catch (error) {
@@ -53,39 +60,59 @@ export async function getPrayerRequest(
   }
 }
 
-export async function createPrayerRequest(
+export async function Create(
   prayerRequest: PrayerRequestFormSchema
 ): Promise<Result<PrayerServiceResponse, PrayerServiceError>> {
   try {
-    const createdDoc = await database.createDocument(
-      env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID,
-      ID.unique(),
-      {
-        prayerRequest: prayerRequest.prayerRequest,
+    const createdPrayer = await db.prayerRequest.create({
+      data: {
+        content: prayerRequest.content,
         country: prayerRequest.country,
-        createdAt: new Date().toISOString(),
-      }
-    )
-    // console.log("Created Prayer Request: ", createdDoc)
+        visibility: "PUBLIC",
+      },
+      include: {
+        comments: true,
+      },
+    })
     return Ok({
-      prayerRequests: [createdDoc as PrayerRequest],
+      prayerRequests: [createdPrayer],
       total: 1,
     })
   } catch (error) {
-    if (error instanceof AppwriteException) {
-      console.error("Appwrite Exception:", error)
-      return Err(handlePrayerServiceError(error))
-    }
+    return Err(handlePrayerServiceError(error))
+  }
+}
+
+export async function Pray(
+  prayerId: string
+): Promise<Result<PrayerServiceResponse, PrayerServiceError>> {
+  try {
+    const prayerRequest = await db.prayerRequest.update({
+      where: {
+        id: prayerId,
+      },
+      data: {
+        prayers: {
+          increment: 1,
+        },
+      },
+      include: {
+        comments: true,
+      },
+    })
+    return Ok({
+      prayerRequests: [prayerRequest],
+      total: 1,
+    })
+  } catch (error) {
     return Err(handlePrayerServiceError(error))
   }
 }
 
 function handlePrayerServiceError(error: any): PrayerServiceError {
   console.error("PrayerRequest Render Error: ", error)
-  if (error instanceof AppwriteException) {
-    console.error("PrayerRequest Render Error: ", error)
-    return { code: error.code, message: error.message }
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return handlePrismaError(error)
   }
 
   return { code: 500, message: "An unexpected error occured" }

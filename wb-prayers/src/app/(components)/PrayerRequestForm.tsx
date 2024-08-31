@@ -1,6 +1,8 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { CommentServiceResponse } from "@/server/CommentService"
+import { PrayerServiceResponse } from "@/server/PrayerService"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as RPNInput from "react-phone-number-input"
@@ -8,7 +10,7 @@ import { toast } from "sonner"
 
 import { Exception } from "@/types/database"
 import { countries } from "@/config/countries"
-import { createPrayerRequest } from "@/lib/PrayersController"
+import { createCommentRequest, createPrayerRequest } from "@/lib/RequestService"
 import { PrayerRequestSchema, type PrayerRequestFormSchema } from "@/lib/utils"
 
 import { Button } from "../../components/ui/button"
@@ -22,30 +24,56 @@ import {
 import { CountrySelect } from "../../components/ui/phone-input"
 import { Textarea } from "../../components/ui/textarea"
 
-export default function PrayerRequestForm() {
+export default function PrayerRequestForm({
+  isComment = false,
+  onCreateComment,
+  prayerRequestId,
+}: {
+  isComment?: boolean
+  prayerRequestId?: string
+  onCreateComment?: (data: CommentServiceResponse) => void
+}) {
   const router = useRouter()
   const form = useForm<PrayerRequestFormSchema>({
     resolver: zodResolver(PrayerRequestSchema),
     defaultValues: {
-      prayerRequest: "",
+      content: "",
       country: "NA",
     },
   })
 
   async function onSubmit(values: PrayerRequestFormSchema) {
-    toast.promise(createPrayerRequest(values), {
-      loading: "Creating prayer request...",
-      success: (data) => {
-        return "Prayer request created successfully"
-      },
-      error: (error) => {
-        console.log(error)
-        if (error instanceof Exception) {
-          return error.message
-        }
-        return "Failed to create prayer request"
-      },
-    })
+    if (isComment && prayerRequestId) {
+      toast.promise(createCommentRequest(values, prayerRequestId), {
+        loading: "Creating prayer request...",
+        success: (data: CommentServiceResponse) => {
+          console.log("Created Prayer Request: ", data)
+          onCreateComment?.(data)
+          return "Your comment has been created!"
+        },
+        error: (error) => {
+          console.log(error)
+          if (error instanceof Exception) {
+            return error.message
+          }
+        },
+      })
+    } else {
+      toast.promise(createPrayerRequest(values), {
+        loading: "Creating prayer request...",
+        success: (data: PrayerServiceResponse) => {
+          console.log("Created Prayer Request: ", data)
+          return "Your Prayer Request has been created! Please refresh the page to see it."
+        },
+        error: (error) => {
+          console.log(error)
+          if (error instanceof Exception) {
+            return error.message
+          }
+          return "Failed to create prayer request"
+        },
+      })
+    }
     router.push("/")
   }
 
@@ -57,13 +85,17 @@ export default function PrayerRequestForm() {
       >
         <FormField
           control={form.control}
-          name="prayerRequest"
+          name="content"
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
                 <Textarea
                   {...field}
-                  placeholder="Type your prayer request, please be as specific as possible."
+                  placeholder={
+                    isComment
+                      ? "Type your comment here."
+                      : "Type your prayer request, please be as specific as possible."
+                  }
                 />
               </FormControl>
               <FormMessage />
@@ -90,7 +122,7 @@ export default function PrayerRequestForm() {
             )}
           />
           <Button type="submit" className="w-full">
-            Share prayer request
+            Share {isComment ? "comment" : "prayer request"}
           </Button>
         </div>
       </form>

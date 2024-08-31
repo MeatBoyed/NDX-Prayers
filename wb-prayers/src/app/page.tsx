@@ -6,8 +6,6 @@ import PrayerRequestForm from "@/app/(components)/PrayerRequestForm"
 
 import PrayerRequestRender from "./(components)/PrayerRequestRender"
 
-export const dynamic = "force-dynamic"
-
 export default async function Home() {
   return (
     <main className="flex min-h-screen w-full items-center justify-center gap-20 px-5 pb-16 pt-4">

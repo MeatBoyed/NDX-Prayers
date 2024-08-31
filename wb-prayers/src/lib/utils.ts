@@ -13,7 +13,7 @@ export const countryCodes = countries.map((country) =>
 ) as [string, ...string[]]
 
 export const PrayerRequestSchema = z.object({
-  prayerRequest: z
+  content: z
     .string()
     .min(10, "Please be as specific as possible.")
     .max(250, "Prayer request is like a Tweet, no more than 250 characters."),
