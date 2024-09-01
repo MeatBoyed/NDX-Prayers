@@ -8,7 +8,7 @@ import { env } from "@/env.mjs"
 import apiClient from "./apiClient"
 import { PrayerRequestFormSchema } from "./utils"
 
-export async function getHomePageData() {
+export async function getPrayerRequests() {
   const res = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/prayers`, {
     method: "GET",
     headers: {
@@ -20,7 +20,7 @@ export async function getHomePageData() {
     return undefined
   }
   const data = await res.json()
-  console.log("Prayer Page View Response", data)
+  // console.log("Prayer Page View Response", data)
   // TODO: Do zod validation here
   // Do zod validation here
   // catch error if validation fails

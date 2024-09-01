@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { CommentServiceResponse } from "@/server/CommentService"
-import { PrayerServiceResponse } from "@/server/prayerService"
+import { PrayerServiceResponse } from "@/server/PrayerService"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as RPNInput from "react-phone-number-input"

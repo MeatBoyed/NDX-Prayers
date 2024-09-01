@@ -1,14 +1,14 @@
 import Link from "next/link"
 import { HomeIcon } from "lucide-react"
 
-import { getHomePageData } from "@/lib/RequestService"
+import { getPrayerRequests } from "@/lib/RequestService"
 import { Button } from "@/components/ui/button"
 import Typography from "@/components/ui/Typography"
 
 import { PrayerCard } from "./PrayerCard"
 
 export default async function PrayerRequestRender() {
-  const prayerRequests = await getHomePageData()
+  const prayerRequests = await getPrayerRequests()
   // console.log("Prayer Requests", prayerRequests)
 
   if (!prayerRequests) {
