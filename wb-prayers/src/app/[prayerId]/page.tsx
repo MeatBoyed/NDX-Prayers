@@ -10,17 +10,17 @@ import { PrayerCard } from "../(components)/PrayerCard"
 
 export const dynamicParams = true
 
-export async function generateStaticParams() {
-  const prayerRequests = await getPrayerRequests()
+// export async function generateStaticParams() {
+//   const prayerRequests = await getPrayerRequests()
 
-  if (!prayerRequests) {
-    return []
-  }
+//   if (!prayerRequests) {
+//     return []
+//   }
 
-  return prayerRequests.prayerRequests.map((prayer) => ({
-    prayerId: prayer.id,
-  }))
-}
+//   return prayerRequests.prayerRequests.map((prayer) => ({
+//     prayerId: prayer.id,
+//   }))
+// }
 
 export const revalidate = 43200 // Revalidate every 12 hours
 
