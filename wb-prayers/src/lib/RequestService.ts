@@ -1,11 +1,14 @@
+"use server"
+
 import { CommentServiceResponse } from "@/server/CommentService"
 import { PrayerServiceResponse } from "@/server/PrayerService"
 
 import { env } from "@/env.mjs"
 
+import apiClient from "./apiClient"
 import { PrayerRequestFormSchema } from "./utils"
 
-export async function getPrayerRequests() {
+export async function getHomePageData() {
   const res = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/prayers`, {
     method: "GET",
     headers: {
@@ -13,11 +16,15 @@ export async function getPrayerRequests() {
     },
   })
   if (!res.ok) {
-    console.log("Prayer Request Render Error", res)
+    console.log("Prayer Page View Error", res)
     return undefined
   }
-  //   console.log("Prayer Requests data: ", data.total)
-  return (await res.json()) as PrayerServiceResponse
+  const data = await res.json()
+  console.log("Prayer Page View Response", data)
+  // TODO: Do zod validation here
+  // Do zod validation here
+  // catch error if validation fails
+  return data as PrayerServiceResponse
 }
 
 export async function getPrayerPageData(prayerId: string) {
@@ -79,4 +86,23 @@ export async function createCommentRequest(
   }
 
   return (await res.json()) as CommentServiceResponse
+}
+
+export async function prayForPrayerRequest(prayerId: string) {
+  const res = await fetch(
+    `${env.NEXT_PUBLIC_APP_URL}/api/prayers/${prayerId}/pray`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  )
+
+  if (!res.ok) {
+    console.log("Pray for Request Error: ", res)
+    throw new Error("Failed to pray for request")
+  }
+
+  return (await res.json()) as PrayerServiceResponse
 }

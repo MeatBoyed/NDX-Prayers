@@ -20,7 +20,6 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/appwrite": ["./src/appwrite.ts"],
       "@/env": ["./src/env.mjs"],
       "@/db": ["./src/server/lib/database.ts"]
     }

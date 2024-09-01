@@ -2,13 +2,12 @@
 
 import { useRouter } from "next/navigation"
 import { CommentServiceResponse } from "@/server/CommentService"
-import { PrayerServiceResponse } from "@/server/PrayerService"
+import { PrayerServiceResponse } from "@/server/prayerService"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as RPNInput from "react-phone-number-input"
 import { toast } from "sonner"
 
-import { Exception } from "@/types/database"
 import { countries } from "@/config/countries"
 import { createCommentRequest, createPrayerRequest } from "@/lib/RequestService"
 import { PrayerRequestSchema, type PrayerRequestFormSchema } from "@/lib/utils"
@@ -53,7 +52,7 @@ export default function PrayerRequestForm({
         },
         error: (error) => {
           console.log(error)
-          if (error instanceof Exception) {
+          if (error instanceof Error) {
             return error.message
           }
         },
@@ -67,7 +66,7 @@ export default function PrayerRequestForm({
         },
         error: (error) => {
           console.log(error)
-          if (error instanceof Exception) {
+          if (error instanceof Error) {
             return error.message
           }
           return "Failed to create prayer request"

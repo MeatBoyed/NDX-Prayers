@@ -1,6 +1,6 @@
 import db from "@/db"
 import { PrayerRequestAndComments } from "@/types"
-import { PrayerRequest, Prisma, Visibility } from "@prisma/client"
+import { Prisma } from "@prisma/client"
 import { Err, Ok, Result } from "ts-results"
 
 import { type PrayerRequestFormSchema } from "@/lib/utils"

@@ -1,15 +1,15 @@
 import Link from "next/link"
 import { HomeIcon } from "lucide-react"
 
-import { getPrayerRequests } from "@/lib/RequestService"
+import { getHomePageData } from "@/lib/RequestService"
 import { Button } from "@/components/ui/button"
 import Typography from "@/components/ui/Typography"
 
 import { PrayerCard } from "./PrayerCard"
 
 export default async function PrayerRequestRender() {
-  const prayerRequests = await getPrayerRequests()
-  console.log("Prayer Requests", prayerRequests?.prayerRequests)
+  const prayerRequests = await getHomePageData()
+  // console.log("Prayer Requests", prayerRequests)
 
   if (!prayerRequests) {
     return (
@@ -40,9 +40,9 @@ export default async function PrayerRequestRender() {
         id="prayer-requests"
         className="grid w-full grid-cols-1 gap-4 md:grid-cols-2"
       >
-        {/* {prayerRequests.prayerRequests.map((prayerRequest) => (
+        {prayerRequests.prayerRequests.map((prayerRequest) => (
           <PrayerCard key={prayerRequest.id} prayerRequest={prayerRequest} />
-        ))} */}
+        ))}
       </section>
     </div>
   )

@@ -1,15 +1,13 @@
 "use client"
 
-import { PropsWithChildren, useState } from "react"
-import Link from "next/link"
-import { CommentServiceResponse } from "@/server/CommentService"
+import { PropsWithChildren, useCallback, useState } from "react"
 import { PrayerRequestAndComments } from "@/types"
-import { Comment, PrayerRequest } from "@prisma/client"
 import { Bookmark, Heart, MessageCircle, Share2 } from "lucide-react"
 import * as RPNI from "react-phone-number-input"
 import { toast } from "sonner"
 
 import { env } from "@/env.mjs"
+import { prayForPrayerRequest } from "@/lib/RequestService"
 import { Button } from "@/components/ui/button"
 import {
   Collapsible,
@@ -38,6 +36,7 @@ export default function StandardCard({
   data: data
   isComment?: boolean
 } & PropsWithChildren) {
+  const [liked, setLiked] = useState(false)
   function handleShare() {
     const shareData = {
       title: "Prayer Requests - NDX",
@@ -50,6 +49,13 @@ export default function StandardCard({
       error: "Failed to share",
     })
   }
+
+  const handleLike = useCallback(async () => {
+    const res = await prayForPrayerRequest(data.id)
+    console.log(res)
+    setLiked(true)
+  }, [data.id])
+
   return (
     <div className="mx-auto max-h-svh w-full space-y-3 overflow-hidden rounded-xl bg-white px-6 py-4 shadow-md dark:bg-gray-800 md:max-w-md">
       {/* Meta Head */}
@@ -79,9 +85,23 @@ export default function StandardCard({
               onClick={handleShare}
               className="cursor-pointer"
             />
-            <Button size="icon" onClick={() => undefined}>
-              🙏
-            </Button>
+            <div
+              className="cursor-pointer"
+              onClick={() => {
+                if (!liked) {
+                  toast.promise(prayForPrayerRequest(data.id), {
+                    loading: "Praying...",
+                    success: () => {
+                      setLiked(true)
+                      return "Prayed!"
+                    },
+                    error: "Failed to pray",
+                  })
+                }
+              }}
+            >
+              {liked ? "🙏" : "🤞"}
+            </div>
           </div>
         </div>
       )}
