@@ -13,7 +13,7 @@ export default async function PrayerRequestRender() {
 
   if (!prayerRequests) {
     return (
-      <div className="flex min-h-fit flex-col items-center justify-center p-4">
+      <div className="mt-4 flex min-h-fit flex-col items-center justify-center p-4">
         <Typography variant="h1" className="mb-2 text-4xl font-bold">
           Oh my goodness!
         </Typography>
